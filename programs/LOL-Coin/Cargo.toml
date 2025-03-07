@@ -1,0 +1,11 @@
+[package]
+name = "lol_coin"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anchor-lang = "0.30.0"
+anchor-spl = "0.30.0"
+
+[features]
+no-entrypoint = []
