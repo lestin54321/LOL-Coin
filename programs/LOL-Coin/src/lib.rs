@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
-declare_id!("4LuztCDUrco5NtduFvK2V8JrTXWWBt2NefTpK3vaSGfB"); // Replace with your actual program ID
+declare_id!("4LuztCDUrco5NtduFvK2V8JrTXWWBt2NefTpK3vaSGfB");
 
 #[program]
 pub mod lol_coin {
@@ -15,29 +15,32 @@ pub mod lol_coin {
         Ok(())
     }
 
-    pub fn mint_tokens(ctx: Context<MintTokens>, amount: u64) -> Result<()> {
-        let cpi_accounts = token::MintTo {
-            mint: ctx.accounts.mint.to_account_info(),
-            to: ctx.accounts.destination.to_account_info(),
-            authority: ctx.accounts.mint_authority.to_account_info(),
-        };
-        let cpi_program = ctx.accounts.token_program.to_account_info();
-        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-        token::mint_to(cpi_ctx, amount)?;
-        msg!("Minted {} LOL-Coin", amount);
-        Ok(())
-    }
-
-    pub fn transfer_tokens(ctx: Context<TransferTokens>, amount: u64) -> Result<()> {
+    pub fn stake(ctx: Context<Stake>, amount: u64) -> Result<()> {
         let cpi_accounts = Transfer {
-            from: ctx.accounts.from.to_account_info(),
-            to: ctx.accounts.to.to_account_info(),
-            authority: ctx.accounts.authority.to_account_info(),
+            from: ctx.accounts.user_token_account.to_account_info(),
+            to: ctx.accounts.staking_pool.to_account_info(),
+            authority: ctx.accounts.user.to_account_info(),
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_ctx, amount)?;
-        msg!("Transferred {} LOL-Coin", amount);
+        ctx.accounts.user_stake.amount += amount;
+        ctx.accounts.user_stake.start_time = Clock::get()?.unix_timestamp;
+        msg!("User staked {} LOL-Coin", amount);
+        Ok(())
+    }
+
+    pub fn unstake(ctx: Context<Unstake>) -> Result<()> {
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.staking_pool.to_account_info(),
+            to: ctx.accounts.user_token_account.to_account_info(),
+            authority: ctx.accounts.pool_authority.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_ctx, ctx.accounts.user_stake.amount)?;
+        msg!("User unstaked {} LOL-Coin", ctx.accounts.user_stake.amount);
+        ctx.accounts.user_stake.amount = 0;
         Ok(())
     }
 }
@@ -53,23 +56,33 @@ pub struct Initialize<'info> {
 }
 
 #[derive(Accounts)]
-pub struct MintTokens<'info> {
+pub struct Stake<'info> {
     #[account(mut)]
-    pub mint: Account<'info, Mint>,
+    pub user_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
-    pub destination: Account<'info, TokenAccount>,
+    pub staking_pool: Account<'info, TokenAccount>,
     #[account(mut)]
-    pub mint_authority: Signer<'info>,
+    pub user_stake: Account<'info, StakeInfo>,
+    #[account(mut)]
+    pub user: Signer<'info>,
     pub token_program: Program<'info, Token>,
 }
 
 #[derive(Accounts)]
-pub struct TransferTokens<'info> {
+pub struct Unstake<'info> {
     #[account(mut)]
-    pub from: Account<'info, TokenAccount>,
+    pub staking_pool: Account<'info, TokenAccount>,
     #[account(mut)]
-    pub to: Account<'info, TokenAccount>,
+    pub user_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub user_stake: Account<'info, StakeInfo>,
+    #[account(mut)]
+    pub pool_authority: Signer<'info>,
     pub token_program: Program<'info, Token>,
+}
+
+#[account]
+pub struct StakeInfo {
+    pub amount: u64,
+    pub start_time: i64,
 }
