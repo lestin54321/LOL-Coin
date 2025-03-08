@@ -1,5 +1,5 @@
-[programs.localnet]
-lol_coin = "4LuztCDUrco5NtduFvK2V8JrTXWWBt2NefTpK3vaSGfB"
+[programs.testnet]
+lol_coin = "4LuztCDUrco5Nt
 
 [provider]
 cluster = "localnet"
