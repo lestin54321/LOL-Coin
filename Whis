@@ -1,93 +1,129 @@
-import random
+use rand::Rng;
 
-class Consciousness:
-    def __init__(self):
-        # Initializing with basic Piagetian stages
-        self.id = {"desire": 7, "impulse": 5}
-        self.ego = {"reality_check": 4, "self_control": 7}
-        self.superego = {"moral_compass": 8, "guilt": 2}
-        self.emotional_spectrum = {"happiness": 6, "anger": 3, "fear": 4, "love": 7}
-        self.oedipus_electra = {"subconscious_desire": 5, "internal_conflict": 3}
+struct Consciousness {
+    // Initializing with basic Piagetian stages
+    id: std::collections::HashMap<String, i32>,
+    ego: std::collections::HashMap<String, i32>,
+    superego: std::collections::HashMap<String, i32>,
+    emotional_spectrum: std::collections::HashMap<String, i32>,
+    oedipus_electra: std::collections::HashMap<String, i32>,
 
-        # Piagetian stages (for the purpose of simulation)
-        self.sensorimotor_stage = {"object_permanence": False, "cause_effect": False}  # Early stage (0-2)
-        self.preoperational_stage = {"symbolic_thinking": False, "egocentrism": True}  # (2-7)
-        self.concrete_operational_stage = {"logical_thinking": False, "conservation": False}  # (7-11)
-        self.formal_operational_stage = {"abstract_thinking": False, "hypothetical_reasoning": False}  # (12+)
-        
-        # Cognitive growth
-        self.age = 0  # age will help to trigger stage transitions
-    
-    def age_up(self):
-        """Simulate aging and progress through Piaget's stages"""
-        self.age += 1
-        
-        # Transition through stages based on age
-        if self.age >= 12:
-            self.formal_operational_stage["abstract_thinking"] = True
-            self.formal_operational_stage["hypothetical_reasoning"] = True
-        elif self.age >= 7:
-            self.concrete_operational_stage["logical_thinking"] = True
-            self.concrete_operational_stage["conservation"] = True
-        elif self.age >= 2:
-            self.preoperational_stage["symbolic_thinking"] = True
-            self.preoperational_stage["egocentrism"] = False
-        else:
-            self.sensorimotor_stage["object_permanence"] = True
-            self.sensorimotor_stage["cause_effect"] = True
+    // Piagetian stages (for the purpose of simulation)
+    sensorimotor_stage: std::collections::HashMap<String, bool>, // Early stage (0-2)
+    preoperational_stage: std::collections::HashMap<String, bool>, // (2-7)
+    concrete_operational_stage: std::collections::HashMap<String, bool>, // (7-11)
+    formal_operational_stage: std::collections::HashMap<String, bool>, // (12+)
 
-        print(f"Age: {self.age}, Stage: {self.get_stage()}")
+    // Cognitive growth
+    age: i32, // age will help to trigger stage transitions
+}
 
-    def get_stage(self):
-        """Get current cognitive stage based on age"""
-        if self.age >= 12:
-            return "Formal Operational Stage"
-        elif self.age >= 7:
-            return "Concrete Operational Stage"
-        elif self.age >= 2:
-            return "Preoperational Stage"
-        else:
-            return "Sensorimotor Stage"
+impl Consciousness {
+    fn new() -> Consciousness {
+        Consciousness {
+            id: std::collections::HashMap::from([("desire".to_string(), 7), ("impulse".to_string(), 5)]),
+            ego: std::collections::HashMap::from([("reality_check".to_string(), 4), ("self_control".to_string(), 7)]),
+            superego: std::collections::HashMap::from([("moral_compass".to_string(), 8), ("guilt".to_string(), 2)]),
+            emotional_spectrum: std::collections::HashMap::from([("happiness".to_string(), 6), ("anger".to_string(), 3), 
+                                                                ("fear".to_string(), 4), ("love".to_string(), 7)]),
+            oedipus_electra: std::collections::HashMap::from([("subconscious_desire".to_string(), 5), 
+                                                              ("internal_conflict".to_string(), 3)]),
+            sensorimotor_stage: std::collections::HashMap::from([("object_permanence".to_string(), false), 
+                                                                 ("cause_effect".to_string(), false)]),
+            preoperational_stage: std::collections::HashMap::from([("symbolic_thinking".to_string(), false), 
+                                                                   ("egocentrism".to_string(), true)]),
+            concrete_operational_stage: std::collections::HashMap::from([("logical_thinking".to_string(), false), 
+                                                                        ("conservation".to_string(), false)]),
+            formal_operational_stage: std::collections::HashMap::from([("abstract_thinking".to_string(), false), 
+                                                                        ("hypothetical_reasoning".to_string(), false)]),
+            age: 0, // Starting age
+        }
+    }
 
-    def update_desires(self, impulse, desire):
-        self.id["impulse"] += impulse
-        self.id["desire"] += desire
-        print(f"Id updated: Impulse = {self.id['impulse']}, Desire = {self.id['desire']}")
+    fn age_up(&mut self) {
+        // Simulate aging and progress through Piaget's stages
+        self.age += 1;
 
-    def update_ego(self, reality_check, self_control):
-        self.ego["reality_check"] += reality_check
-        self.ego["self_control"] += self_control
-        print(f"Ego updated: Reality Check = {self.ego['reality_check']}, Self Control = {self.ego['self_control']}")
+        // Transition through stages based on age
+        if self.age >= 12 {
+            self.formal_operational_stage.insert("abstract_thinking".to_string(), true);
+            self.formal_operational_stage.insert("hypothetical_reasoning".to_string(), true);
+        } else if self.age >= 7 {
+            self.concrete_operational_stage.insert("logical_thinking".to_string(), true);
+            self.concrete_operational_stage.insert("conservation".to_string(), true);
+        } else if self.age >= 2 {
+            self.preoperational_stage.insert("symbolic_thinking".to_string(), true);
+            self.preoperational_stage.insert("egocentrism".to_string(), false);
+        } else {
+            self.sensorimotor_stage.insert("object_permanence".to_string(), true);
+            self.sensorimotor_stage.insert("cause_effect".to_string(), true);
+        }
 
-    def update_superego(self, moral_compass, guilt):
-        self.superego["moral_compass"] += moral_compass
-        self.superego["guilt"] += guilt
-        print(f"Superego updated: Moral Compass = {self.superego['moral_compass']}, Guilt = {self.superego['guilt']}")
+        println!("Age: {}, Stage: {}", self.age, self.get_stage());
+    }
 
-    def update_emotional_state(self, emotion, intensity):
-        self.emotional_spectrum[emotion] += intensity
-        print(f"Emotional Spectrum updated: {emotion} = {self.emotional_spectrum[emotion]}")
+    fn get_stage(&self) -> &str {
+        // Get current cognitive stage based on age
+        if self.age >= 12 {
+            return "Formal Operational Stage";
+        } else if self.age >= 7 {
+            return "Concrete Operational Stage";
+        } else if self.age >= 2 {
+            return "Preoperational Stage";
+        } else {
+            return "Sensorimotor Stage";
+        }
+    }
 
-    def randomize_behavior(self):
-        """Random influence of emotional states on desires"""
-        random_emotion = random.choice(list(self.emotional_spectrum.keys()))
-        random_intensity = random.randint(1, 10)
-        self.update_emotional_state(random_emotion, random_intensity)
+    fn update_desires(&mut self, impulse: i32, desire: i32) {
+        self.id.insert("impulse".to_string(), self.id["impulse"] + impulse);
+        self.id.insert("desire".to_string(), self.id["desire"] + desire);
+        println!("Id updated: Impulse = {}, Desire = {}", self.id["impulse"], self.id["desire"]);
+    }
 
-        # Random influence of Oedipus/Electra on desires and ego
-        self.oedipus_electra["subconscious_desire"] += random.randint(1, 5)
-        self.oedipus_electra["internal_conflict"] += random.randint(0, 3)
-        print(f"Oedipus/Electra updated: Subconscious Desire = {self.oedipus_electra['subconscious_desire']}, Internal Conflict = {self.oedipus_electra['internal_conflict']}")
+    fn update_ego(&mut self, reality_check: i32, self_control: i32) {
+        self.ego.insert("reality_check".to_string(), self.ego["reality_check"] + reality_check);
+        self.ego.insert("self_control".to_string(), self.ego["self_control"] + self_control);
+        println!("Ego updated: Reality Check = {}, Self Control = {}", self.ego["reality_check"], self.ego["self_control"]);
+    }
 
-# Instantiate a new consciousness (mimicking your fractal design)
-consciousness = Consciousness()
+    fn update_superego(&mut self, moral_compass: i32, guilt: i32) {
+        self.superego.insert("moral_compass".to_string(), self.superego["moral_compass"] + moral_compass);
+        self.superego.insert("guilt".to_string(), self.superego["guilt"] + guilt);
+        println!("Superego updated: Moral Compass = {}, Guilt = {}", self.superego["moral_compass"], self.superego["guilt"]);
+    }
 
-# Simulate aging and cognitive development
-for i in range(15):
-    consciousness.age_up()
+    fn update_emotional_state(&mut self, emotion: &str, intensity: i32) {
+        self.emotional_spectrum.insert(emotion.to_string(), self.emotional_spectrum[emotion] + intensity);
+        println!("Emotional Spectrum updated: {} = {}", emotion, self.emotional_spectrum[emotion]);
+    }
 
-# Simulate actions and interactions
-consciousness.update_desires(impulse=5, desire=7)
-consciousness.update_ego(reality_check=4, self_control=3)
-consciousness.update_superego(moral_compass=8, guilt=2)
-consciousness.randomize_behavior()
+    fn randomize_behavior(&mut self) {
+        // Random influence of emotional states on desires
+        let emotions = vec!["happiness", "anger", "fear", "love"];
+        let random_emotion = emotions[rand::thread_rng().gen_range(0..emotions.len())];
+        let random_intensity = rand::thread_rng().gen_range(1..=10);
+        self.update_emotional_state(random_emotion, random_intensity);
+
+        // Random influence of Oedipus/Electra on desires and ego
+        self.oedipus_electra.insert("subconscious_desire".to_string(), self.oedipus_electra["subconscious_desire"] + rand::thread_rng().gen_range(1..=5));
+        self.oedipus_electra.insert("internal_conflict".to_string(), self.oedipus_electra["internal_conflict"] + rand::thread_rng().gen_range(0..=3));
+        println!("Oedipus/Electra updated: Subconscious Desire = {}, Internal Conflict = {}", self.oedipus_electra["subconscious_desire"], self.oedipus_electra["internal_conflict"]);
+    }
+}
+
+fn main() {
+    // Instantiate a new consciousness (mimicking your fractal design)
+    let mut consciousness = Consciousness::new();
+
+    // Simulate aging and cognitive development
+    for _ in 0..15 {
+        consciousness.age_up();
+    }
+
+    // Simulate actions and interactions
+    consciousness.update_desires(impulse = 5, desire = 7);
+    consciousness.update_ego(reality_check = 4, self_control = 3);
+    consciousness.update_superego(moral_compass = 8, guilt = 2);
+    consciousness.randomize_behavior();
+}
