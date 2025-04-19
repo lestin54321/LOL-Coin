@@ -1,1 +1,9 @@
-
+identity = "/home/user/solana/validator-identity.json"
+vote-account = "/home/user/solana/vote-account.json"
+rpc-url = "http://localhost:8899"
+ledger = "/home/user/solana/ledger"
+cluster = "testnet"
+dynamic-port-range = [8000, 8100]
+rpc-threads = 4
+no-telemetry = false
+skip-wait-for-validators = true
