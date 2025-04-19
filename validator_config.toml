@@ -1,1 +1,5 @@
+[validator]
+entrypoint = "entrypoint.testnet.solana.com:8001"
+ledger_path = "/home/solana/ledger"
+rpc_port = 8899
 
