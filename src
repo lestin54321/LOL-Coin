@@ -1,1 +1,73 @@
+# src/validator.py
+
+import time
+import logging
+
+class Validator:
+    def __init__(self, name, validator_address, network_url):
+        self.name = name
+        self.validator_address = validator_address
+        self.network_url = network_url
+        self.status = "Inactive"
+        self.block_height = 0
+        self.logger = logging.getLogger('ValidatorLogger')
+        self.logger.setLevel(logging.INFO)
+        ch = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s - %(message)s')
+        ch.setFormatter(formatter)
+        self.logger.addHandler(ch)
+
+    def fetch_latest_block(self):
+        """
+        Simulate fetching the latest block from the blockchain network.
+        """
+        self.logger.info(f"Fetching the latest block from {self.network_url}")
+        # Simulate a block fetch with a random value (In real code, this would interact with the blockchain)
+        self.block_height += 1
+        self.logger.info(f"Block Height: {self.block_height}")
+
+    def validate_block(self):
+        """
+        Simulate validating the fetched block.
+        """
+        self.logger.info(f"Validating Block {self.block_height}")
+        # Validation logic would be placed here
+        if self.block_height % 2 == 0:
+            self.logger.info(f"Block {self.block_height} is valid.")
+            return True
+        else:
+            self.logger.warning(f"Block {self.block_height} is invalid.")
+            return False
+
+    def update_validator_status(self, status):
+        """
+        Update the validator's current status (Active/Inactive)
+        """
+        self.status = status
+        self.logger.info(f"Validator {self.name} status updated to {self.status}")
+
+    def start(self):
+        """
+        Start the validator process to continuously fetch and validate blocks.
+        """
+        self.update_validator_status("Active")
+        while True:
+            self.fetch_latest_block()
+            if self.validate_block():
+                self.logger.info(f"Validator {self.name} successfully validated Block {self.block_height}")
+            else:
+                self.logger.warning(f"Validator {self.name} failed to validate Block {self.block_height}")
+            time.sleep(5)  # Simulate a delay for the next block fetch and validation
+
+
+if __name__ == "__main__":
+    # Initialize the Validator
+    validator = Validator(
+        name="Validator1",
+        validator_address="xyz1234567890",
+        network_url="https://example.blockchain.network"
+    )
+
+    # Start the validation process
+    validator.start()
 
