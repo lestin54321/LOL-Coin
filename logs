@@ -1,1 +1,44 @@
+import logging
+
+# Set up the logger
+logger = logging.getLogger('ValidatorLogger')
+logger.setLevel(logging.DEBUG)  # Capture all levels of logs (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+
+# Create a file handler to store logs in a file (change path as needed)
+file_handler = logging.FileHandler('validator.log')
+file_handler.setLevel(logging.DEBUG)
+
+# Create a console handler for displaying logs in the terminal (optional)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)  # This can be adjusted based on the severity of the log you want in console
+
+# Create log formatters
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+# Set the formatter to handlers
+file_handler.setFormatter(formatter)
+console_handler.setFormatter(formatter)
+
+# Add handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+
+# Example logs
+def log_validator_activity():
+    try:
+        # Example activity log
+        logger.info('Validator started processing.')
+        
+        # Example warning
+        logger.warning('Validator is under heavy load, performance may be affected.')
+
+        # Simulating an error
+        raise Exception("Critical failure in validator!")
+    
+    except Exception as e:
+        # Log the error with the exception
+        logger.error(f"An error occurred: {e}", exc_info=True)
+
+# Run example
+log_validator_activity()
 
