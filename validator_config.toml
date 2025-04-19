@@ -1,5 +1,6 @@
-[validator]
-entrypoint = "entrypoint.testnet.solana.com:8001"
-ledger_path = "/home/solana/ledger"
-rpc_port = 8899
-
+log = "/home/your_username/solana/validator.log"
+full_snapshot_interval_slots = 5000
+incremental_snapshot_interval_slots = 1000
+accounts_index_config = "account_info"
+dynamic_port_range = [8000, 8020]
+wal_recovery_mode = "skip_any_corrupted_record"
