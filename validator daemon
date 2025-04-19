@@ -1,1 +1,97 @@
+# validator_daemon/Cargo.toml
+[package]
+name = "validator_daemon"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+daemonize = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.7"
+log = "0.4"
+simplelog = "0.12"
+``` 
+
+```rust
+// validator_daemon/src/main.rs
+use daemonize::Daemonize;
+use log::{error, info};
+use simplelog::{Config, WriteLogger};
+use std::fs::{File, OpenOptions};
+use std::process::{Child, Command};
+use std::thread::sleep;
+use std::time::Duration;
+
+#[derive(serde::Deserialize)]
+struct ValidatorConfig {
+    binary_path: String,
+    args: Vec<String>,
+    restart_delay_secs: u64,
+    log_dir: String,
+}
+
+fn load_config(path: &str) -> ValidatorConfig {
+    let content = std::fs::read_to_string(path)
+        .expect("Failed to read configuration file");
+    toml::from_str(&content).expect("Failed to parse config.toml")
+}
+
+fn start_validator(cfg: &ValidatorConfig) -> Child {
+    info!("Starting validator: {} {:?}", cfg.binary_path, cfg.args);
+    Command::new(&cfg.binary_path)
+        .args(&cfg.args)
+        .spawn()
+        .expect("Failed to spawn validator process")
+}
+
+fn main() {
+    // Daemonize the process
+    let stdout = File::create("validator/validator.out").unwrap();
+    let stderr = File::create("validator/validator.err").unwrap();
+    let daemonize = Daemonize::new()
+        .stdout(stdout)
+        .stderr(stderr)
+        .exit_action(|| println!("Validator daemon started"));
+
+    daemonize.start().expect("Daemonization failed");
+
+    // Initialize logging to file
+    let log_file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open("validator/logs/daemon.log")
+        .unwrap();
+    WriteLogger::init(log::LevelFilter::Info, Config::default(), log_file)
+        .unwrap();
+
+    // Load configuration
+    let cfg = load_config("validator/config/validator_config.toml");
+
+    // Supervisor loop
+    loop {
+        let mut child = start_validator(&cfg);
+        match child.wait() {
+            Ok(status) => {
+                error!("Validator exited with: {}", status);
+            }
+            Err(e) => {
+                error!("Failed to wait on validator process: {}", e);
+            }
+        }
+        info!("Restarting in {} seconds...", cfg.restart_delay_secs);
+        sleep(Duration::from_secs(cfg.restart_delay_secs));
+    }
+}
+```
+
+> Place your TOML config at `validator/config/validator_config.toml`, for example:
+```toml
+binary_path = "/usr/local/bin/solana-validator"
+args = [
+  "--entrypoint", "entrypoint.testnet.solana.com:8001",
+  "--ledger", "/home/solana/ledger",
+  "--rpc-port", "8899"
+]
+restart_delay_secs = 5
+log_dir = "validator/logs"
 
