@@ -1,5 +1,5 @@
-[programs.testnet]
-lol_coin = "4LuztCDUrco5NtduFvK2V8JrTXWWBt2NefTpK3vaSGfB"
+[programs.localnet]
+lol_coin_staking = "4LuztCDUrco5NtduFvK2V8JrTXWWBt2NefTpK3vaSGfB"
 
 [provider]
 cluster = "https://api.testnet.solana.com"
