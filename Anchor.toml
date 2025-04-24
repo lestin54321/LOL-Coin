@@ -1,5 +1,8 @@
 [workspace]
-members = ["programs/*"]    # Anchor’s default
+members = [
+  "programs/*",                            # if you still have other programs here
+  "lol_coin"                               # <-- this folder, relative to Anchor.toml
+]
 
 [programs.localnet]
 lol_coin_staking = "4LuztCDUrco5NtduFvK2V8JrTXWWBt2NefTpK3vaSGfB"
