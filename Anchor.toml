@@ -1,3 +1,6 @@
+[workspace]
+members = ["programs/*"]    # Anchor’s default
+l
 [programs.localnet]
 lol_coin_staking = "4LuztCDUrco5NtduFvK2V8JrTXWWBt2NefTpK3vaSGfB"
 
